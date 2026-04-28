@@ -1,0 +1,91 @@
+<div class="dashboard">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">📦 InvenPro</div>
+    <nav>
+      <a class="nav-item active">🏠 Dashboard</a>
+      <a class="nav-item">📦 Inventory</a>
+      <a class="nav-item">📊 Reports</a>
+      <a class="nav-item">⚙️ Settings</a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <h2>Inventory Management</h2>
+      <div class="topbar-right">
+        <span class="badge">Admin</span>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats">
+      <div class="card">
+        <p>Total Items</p>
+        <h3>128</h3>
+      </div>
+      <div class="card">
+        <p>Low Stock</p>
+        <h3>12</h3>
+      </div>
+      <div class="card">
+        <p>Total Value</p>
+        <h3>$24,500</h3>
+      </div>
+      <div class="card">
+        <p>Categories</p>
+        <h3>8</h3>
+      </div>
+    </div>
+
+    <!-- Add Item Form -->
+    <div class="form-section">
+      <input placeholder="Item Name" />
+      <input placeholder="Quantity" type="number" />
+      <input placeholder="Price" type="number" />
+      <button class="btn-add">+ Add Item</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sample Item A</td>
+            <td>10</td>
+            <td>$25.00</td>
+            <td><span class="status in-stock">In Stock</span></td>
+            <td>
+              <button class="btn-edit">Edit</button>
+              <button class="btn-delete">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Sample Item B</td>
+            <td>3</td>
+            <td>$10.00</td>
+            <td><span class="status low-stock">Low Stock</span></td>
+            <td>
+              <button class="btn-edit">Edit</button>
+              <button class="btn-delete">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
