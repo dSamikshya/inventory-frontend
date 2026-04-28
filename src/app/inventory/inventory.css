@@ -210,3 +210,22 @@ td {
   cursor: pointer;
   font-size: 13px;
 }
+.search-bar {
+  display: flex;
+  margin-bottom: -12px;
+}
+
+.search-bar input {
+  width: 300px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-bar input:focus {
+  border-color: #38bdf8;
+}
