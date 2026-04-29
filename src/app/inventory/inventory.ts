@@ -21,6 +21,8 @@ export class Inventory implements OnInit {
   pageSize: number = 10;
   totalPages: number = 0;
   showAddModal: boolean = false;
+  toast: string = '';
+  toastType: string = '';
   newProduct = {
     name: '',
     sku: '',
@@ -50,18 +52,28 @@ export class Inventory implements OnInit {
         this.lowStockCount = this.products.filter(p => p.totalQuantity <= p.reorderThreshold).length;
         this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: () => {
         this.error = 'Failed to load products';
         this.cdr.detectChanges();
       }
     });
   }
 
-  openAddModal(): void {
-  console.log('Button clicked!');
-  this.showAddModal = true;
+  showToast(message: string, type: string): void {
+  this.toast = message;
+  this.toastType = type;
   this.cdr.detectChanges();
+  setTimeout(() => {
+    this.toast = '';
+    this.toastType = '';
+    this.cdr.detectChanges();
+  }, 3000);
 }
+
+  openAddModal(): void {
+    this.showAddModal = true;
+    this.cdr.detectChanges();
+  }
 
   closeAddModal(): void {
     this.showAddModal = false;
@@ -73,6 +85,7 @@ export class Inventory implements OnInit {
       reorderThreshold: 10,
       categoryId: null
     };
+    this.cdr.detectChanges();
   }
 
   addProduct(): void {
@@ -80,10 +93,10 @@ export class Inventory implements OnInit {
       next: () => {
         this.closeAddModal();
         this.loadProducts();
+        this.showToast('Product added successfully!', 'success');
       },
-      error: (err) => {
-        this.error = 'Failed to add product';
-        this.cdr.detectChanges();
+      error: () => {
+        this.showToast('Failed to add product', 'error');
       }
     });
   }
@@ -91,8 +104,11 @@ export class Inventory implements OnInit {
   deleteProduct(id: number): void {
     if (confirm('Are you sure you want to delete this product?')) {
       this.productService.deleteProduct(id).subscribe({
-        next: () => this.loadProducts(),
-        error: () => this.error = 'Failed to delete product'
+        next: () => {
+          this.loadProducts();
+          this.showToast('Product deleted!', 'success');
+        },
+        error: () => this.showToast('Failed to delete product', 'error')
       });
     }
   }

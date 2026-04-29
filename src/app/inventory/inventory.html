@@ -26,6 +26,11 @@
       </div>
     </div>
 
+    <!-- Toast -->
+    @if (toast) {
+      <div class="toast {{ toastType }}">{{ toast }}</div>
+    }
+
     <!-- Stats Cards -->
     <div class="stats">
       <div class="card">
