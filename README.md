@@ -67,6 +67,3 @@ Coming soon — Spring Boot REST API integration in progress.
 
 Built by Samikshya — CS Master's graduate passionate about full stack development.
 
-## 📄 License
-
-MIT
