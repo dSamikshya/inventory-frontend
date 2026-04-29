@@ -9,6 +9,9 @@
       <a class="nav-item">📊 Reports</a>
       <a class="nav-item">⚙️ Settings</a>
     </nav>
+    <div class="sidebar-bottom">
+      <a class="nav-item logout" (click)="logout()">🚪 Logout</a>
+    </div>
   </div>
 
   <!-- Main Content -->
@@ -25,70 +28,99 @@
     <!-- Stats Cards -->
     <div class="stats">
       <div class="card">
-        <p>Total Items</p>
-        <h3>128</h3>
+        <p>Total Products</p>
+        <h3>{{ totalItems }}</h3>
       </div>
       <div class="card">
         <p>Low Stock</p>
-        <h3>12</h3>
+        <h3>{{ lowStockCount }}</h3>
       </div>
       <div class="card">
-        <p>Total Value</p>
-        <h3>$24,500</h3>
+        <p>Current Page</p>
+        <h3>{{ currentPage + 1 }} / {{ totalPages }}</h3>
       </div>
       <div class="card">
-        <p>Categories</p>
-        <h3>8</h3>
+        <p>Page Size</p>
+        <h3>{{ pageSize }}</h3>
       </div>
     </div>
 
-    <!-- Add Item Form -->
-    <div class="form-section">
-      <input placeholder="Item Name" />
-      <input placeholder="Quantity" type="number" />
-      <input placeholder="Price" type="number" />
-      <button class="btn-add">+ Add Item</button>
-    </div>
+    <!-- Error Message -->
+    @if (error) {
+      <div class="error-banner">{{ error }}</div>
+    }
+
+
+    <!-- Search Bar -->
     <div class="search-bar">
-  <input placeholder="🔍 Search items..." />
-</div>
+      <input placeholder="🔍 Search items..." />
+    </div>
 
     <!-- Table -->
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Sample Item A</td>
-            <td>10</td>
-            <td>$25.00</td>
-            <td><span class="status in-stock">In Stock</span></td>
-            <td>
-              <button class="btn-edit">Edit</button>
-              <button class="btn-delete">Delete</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Sample Item B</td>
-            <td>3</td>
-            <td>$10.00</td>
-            <td><span class="status low-stock">Low Stock</span></td>
-            <td>
-              <button class="btn-edit">Edit</button>
-              <button class="btn-delete">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Selling Price</th>
+              <th>Avg Cost</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            @for (product of products; track product.id) {
+              <tr>
+                <td class="sku">{{ product.sku }}</td>
+                <td>{{ product.name }}</td>
+                <td>
+                  @if (product.categoryName) {
+                    <span class="category">{{ product.categoryName }}</span>
+                  } @else {
+                    <span class="no-category">—</span>
+                  }
+                </td>
+                <td>{{ product.totalQuantity }}</td>
+                <td>${{ product.sellingPrice }}</td>
+                <td>${{ product.averageCostPrice }}</td>
+                <td>
+                  <span class="status {{ getStockStatus(product) }}">
+                    {{ getStockLabel(product) }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-edit">Edit</button>
+                  <button class="btn-delete" (click)="deleteProduct(product.id)">Delete</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button
+            class="btn-page"
+            [disabled]="currentPage === 0"
+            (click)="currentPage = currentPage - 1; loadProducts()">
+            ← Prev
+          </button>
+          <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+          <button
+            class="btn-page"
+            [disabled]="currentPage >= totalPages - 1"
+            (click)="currentPage = currentPage + 1; loadProducts()">
+            Next →
+          </button>
+        </div>
+
+      </div>
+    
 
   </div>
 </div>
