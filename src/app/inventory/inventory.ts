@@ -23,6 +23,8 @@ export class Inventory implements OnInit {
   showAddModal: boolean = false;
   toast: string = '';
   toastType: string = '';
+  showEditModal: boolean = false;
+editProduct: any = null;
   newProduct = {
     name: '',
     sku: '',
@@ -100,6 +102,39 @@ export class Inventory implements OnInit {
       }
     });
   }
+  
+
+openEditModal(product: any): void {
+  this.editProduct = { ...product };
+  this.showEditModal = true;
+  this.cdr.detectChanges();
+}
+
+closeEditModal(): void {
+  this.showEditModal = false;
+  this.editProduct = null;
+  this.cdr.detectChanges();
+}
+
+saveEditProduct(): void {
+  this.productService.updateProduct(this.editProduct.id, {
+    name: this.editProduct.name,
+    sku: this.editProduct.sku,
+    description: this.editProduct.description,
+    sellingPrice: this.editProduct.sellingPrice,
+    reorderThreshold: this.editProduct.reorderThreshold,
+    categoryId: this.editProduct.categoryId
+  }).subscribe({
+    next: () => {
+      this.closeEditModal();
+      this.loadProducts();
+      this.showToast('Product updated successfully!', 'success');
+    },
+    error: () => {
+      this.showToast('Failed to update product', 'error');
+    }
+  });
+}
 
   deleteProduct(id: number): void {
     if (confirm('Are you sure you want to delete this product?')) {
