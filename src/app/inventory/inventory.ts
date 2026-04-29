@@ -1,12 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ProductService } from '../services/product';
 import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-inventory',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './inventory.html',
   styleUrl: './inventory.css',
 })
@@ -19,6 +20,15 @@ export class Inventory implements OnInit {
   currentPage: number = 0;
   pageSize: number = 10;
   totalPages: number = 0;
+  showAddModal: boolean = false;
+  newProduct = {
+    name: '',
+    sku: '',
+    description: '',
+    sellingPrice: 0,
+    reorderThreshold: 10,
+    categoryId: null
+  };
 
   constructor(
     private productService: ProductService,
@@ -42,6 +52,37 @@ export class Inventory implements OnInit {
       },
       error: (err) => {
         this.error = 'Failed to load products';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  openAddModal(): void {
+  console.log('Button clicked!');
+  this.showAddModal = true;
+  this.cdr.detectChanges();
+}
+
+  closeAddModal(): void {
+    this.showAddModal = false;
+    this.newProduct = {
+      name: '',
+      sku: '',
+      description: '',
+      sellingPrice: 0,
+      reorderThreshold: 10,
+      categoryId: null
+    };
+  }
+
+  addProduct(): void {
+    this.productService.createProduct(this.newProduct).subscribe({
+      next: () => {
+        this.closeAddModal();
+        this.loadProducts();
+      },
+      error: (err) => {
+        this.error = 'Failed to add product';
         this.cdr.detectChanges();
       }
     });

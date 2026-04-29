@@ -21,6 +21,7 @@
     <div class="topbar">
       <h2>Inventory Management</h2>
       <div class="topbar-right">
+        <button class="btn-add-product" (click)="openAddModal()">+ Add Product</button>
         <span class="badge">Admin</span>
       </div>
     </div>
@@ -50,77 +51,130 @@
       <div class="error-banner">{{ error }}</div>
     }
 
-
     <!-- Search Bar -->
     <div class="search-bar">
       <input placeholder="🔍 Search items..." />
     </div>
 
     <!-- Table -->
-    
-      <div class="table-wrapper">
-        <table>
-          <thead>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Selling Price</th>
+            <th>Avg Cost</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products; track product.id) {
             <tr>
-              <th>SKU</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Selling Price</th>
-              <th>Avg Cost</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <td class="sku">{{ product.sku }}</td>
+              <td>{{ product.name }}</td>
+              <td>
+                @if (product.categoryName) {
+                  <span class="category">{{ product.categoryName }}</span>
+                } @else {
+                  <span class="no-category">—</span>
+                }
+              </td>
+              <td>{{ product.totalQuantity }}</td>
+              <td>${{ product.sellingPrice }}</td>
+              <td>${{ product.averageCostPrice }}</td>
+              <td>
+                <span class="status {{ getStockStatus(product) }}">
+                  {{ getStockLabel(product) }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-edit">Edit</button>
+                <button class="btn-delete" (click)="deleteProduct(product.id)">Delete</button>
+              </td>
             </tr>
-          </thead>
-          
-          <tbody>
-            @for (product of products; track product.id) {
-              <tr>
-                <td class="sku">{{ product.sku }}</td>
-                <td>{{ product.name }}</td>
-                <td>
-                  @if (product.categoryName) {
-                    <span class="category">{{ product.categoryName }}</span>
-                  } @else {
-                    <span class="no-category">—</span>
-                  }
-                </td>
-                <td>{{ product.totalQuantity }}</td>
-                <td>${{ product.sellingPrice }}</td>
-                <td>${{ product.averageCostPrice }}</td>
-                <td>
-                  <span class="status {{ getStockStatus(product) }}">
-                    {{ getStockLabel(product) }}
-                  </span>
-                </td>
-                <td>
-                  <button class="btn-edit">Edit</button>
-                  <button class="btn-delete" (click)="deleteProduct(product.id)">Delete</button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+          }
+        </tbody>
+      </table>
 
-        <!-- Pagination -->
-        <div class="pagination">
-          <button
-            class="btn-page"
-            [disabled]="currentPage === 0"
-            (click)="currentPage = currentPage - 1; loadProducts()">
-            ← Prev
-          </button>
-          <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-          <button
-            class="btn-page"
-            [disabled]="currentPage >= totalPages - 1"
-            (click)="currentPage = currentPage + 1; loadProducts()">
-            Next →
-          </button>
-        </div>
-
+      <!-- Pagination -->
+      <div class="pagination">
+        <button
+          class="btn-page"
+          [disabled]="currentPage === 0"
+          (click)="currentPage = currentPage - 1; loadProducts()">
+          ← Prev
+        </button>
+        <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+        <button
+          class="btn-page"
+          [disabled]="currentPage >= totalPages - 1"
+          (click)="currentPage = currentPage + 1; loadProducts()">
+          Next →
+        </button>
       </div>
-    
+    </div>
+
+    <!-- Add Product Modal -->
+    @if (showAddModal) {
+      <div class="modal-overlay" (click)="closeAddModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Add New Product</h3>
+            <button class="btn-close" (click)="closeAddModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Product Name *</label>
+              <input
+                type="text"
+                placeholder="e.g. iPhone 15"
+                [(ngModel)]="newProduct.name"
+              />
+            </div>
+            <div class="form-group">
+              <label>SKU *</label>
+              <input
+                type="text"
+                placeholder="e.g. APPLE-003"
+                [(ngModel)]="newProduct.sku"
+              />
+            </div>
+            <div class="form-group">
+              <label>Selling Price *</label>
+              <input
+                type="number"
+                placeholder="e.g. 999.99"
+                [(ngModel)]="newProduct.sellingPrice"
+              />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input
+                type="text"
+                placeholder="Optional description"
+                [(ngModel)]="newProduct.description"
+              />
+            </div>
+            <div class="form-group">
+              <label>Reorder Threshold</label>
+              <input
+                type="number"
+                placeholder="Default: 10"
+                [(ngModel)]="newProduct.reorderThreshold"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-cancel" (click)="closeAddModal()">Cancel</button>
+            <button class="btn-save" (click)="addProduct()">Add Product</button>
+          </div>
+        </div>
+      </div>
+    }
 
   </div>
 </div>
