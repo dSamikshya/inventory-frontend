@@ -116,6 +116,47 @@ closeEditModal(): void {
   this.cdr.detectChanges();
 }
 
+
+
+showImportModal: boolean = false;
+importFile: File | null = null;
+importing: boolean = false;
+
+openImportModal(): void {
+  this.showImportModal = true;
+  this.cdr.detectChanges();
+}
+
+closeImportModal(): void {
+  this.showImportModal = false;
+  this.importFile = null;
+  this.importing = false;
+  this.cdr.detectChanges();
+}
+
+onFileSelected(event: any): void {
+  this.importFile = event.target.files[0];
+}
+
+importExcel(): void {
+  if (!this.importFile) {
+    this.showToast('Please select a file first', 'error');
+    return;
+  }
+  this.importing = true;
+  this.productService.importFromExcel(this.importFile).subscribe({
+    next: (response) => {
+      this.closeImportModal();
+      this.loadProducts();
+      this.showToast(`Import done! ${response.successCount} products imported`, 'success');
+    },
+    error: () => {
+      this.importing = false;
+      this.showToast('Import failed', 'error');
+      this.cdr.detectChanges();
+    }
+  });
+}
 saveEditProduct(): void {
   this.productService.updateProduct(this.editProduct.id, {
     name: this.editProduct.name,

@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -58,4 +59,19 @@ export class ProductService {
       headers: this.getHeaders()
     });
   }
+  importFromExcel(file: File): Observable<any> {
+  const token = this.authService.getToken();
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  return this.http.post(
+    'http://localhost:8080/api/products/batches/import/excel',
+    formData,
+    { headers }
+  );
+}
 }
