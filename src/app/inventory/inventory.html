@@ -60,8 +60,12 @@
     }
 
     <div class="search-bar">
-      <input placeholder="🔍 Search items..." />
-    </div>
+  <input 
+    placeholder="🔍 Search products..." 
+    [value]="searchTerm"
+    (input)="onSearch($event)"
+  />
+</div>
 
     <div class="table-wrapper">
       <table>

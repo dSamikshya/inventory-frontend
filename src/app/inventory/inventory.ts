@@ -288,4 +288,27 @@ export class Inventory implements OnInit {
   formatPrice(value: number): string {
     return value ? Number(value).toFixed(2) : '0.00';
   }
+  searchTerm: string = '';
+searchTimeout: any = null;
+
+onSearch(event: any): void {
+  this.searchTerm = event.target.value;
+  clearTimeout(this.searchTimeout);
+  this.searchTimeout = setTimeout(() => {
+    if (this.searchTerm.trim()) {
+      this.productService.searchProducts(this.searchTerm).subscribe({
+        next: (response) => {
+          this.products = [...response.content];
+          this.totalItems = response.totalElements;
+          this.totalPages = response.totalPages;
+          this.cdr.detectChanges();
+        },
+        error: () => this.showToast('Search failed', 'error')
+      });
+    } else {
+      this.currentPage = 0;
+      this.loadProducts();
+    }
+  }, 400);
+}
 }
