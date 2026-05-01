@@ -1,6 +1,5 @@
-<div class="dashboard">
+<div class="dashboard" (click)="closeDropdown()">
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">📦 InvenPro</div>
     <nav>
@@ -14,25 +13,29 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main">
 
-    <!-- Top Bar -->
     <div class="topbar">
       <h2>Inventory Management</h2>
       <div class="topbar-right">
-        <button class="btn-import" (click)="openImportModal()">📥 Import Excel</button>
-        <button class="btn-add-product" (click)="openAddModal()">+ Add Product</button>
+        <div class="dropdown-wrapper">
+  <button class="btn-add-product">+ Add / Import ▾</button>
+  <div class="dropdown-menu">
+    <button class="dropdown-item" (click)="openAddModal()">➕ New Product</button>
+    <button class="dropdown-item" (click)="openBatchModal()">📦 Receive Stock</button>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item" (click)="openImportModal('excel')">📥 Import Excel</button>
+    <button class="dropdown-item" (click)="openImportModal('csv')">📄 Import CSV</button>
+  </div>
+</div>
         <span class="badge">Admin</span>
       </div>
     </div>
 
-    <!-- Toast -->
     @if (toast) {
       <div class="toast {{ toastType }}">{{ toast }}</div>
     }
 
-    <!-- Stats Cards -->
     <div class="stats">
       <div class="card">
         <p>Total Products</p>
@@ -43,26 +46,23 @@
         <h3>{{ lowStockCount }}</h3>
       </div>
       <div class="card">
-        <p>Current Page</p>
+        <p>Page</p>
         <h3>{{ currentPage + 1 }} / {{ totalPages }}</h3>
       </div>
       <div class="card">
-        <p>Page Size</p>
-        <h3>{{ pageSize }}</h3>
+        <p>Categories</p>
+        <h3>{{ categories.length }}</h3>
       </div>
     </div>
 
-    <!-- Error Message -->
     @if (error) {
       <div class="error-banner">{{ error }}</div>
     }
 
-    <!-- Search Bar -->
     <div class="search-bar">
       <input placeholder="🔍 Search items..." />
     </div>
 
-    <!-- Table -->
     <div class="table-wrapper">
       <table>
         <thead>
@@ -70,7 +70,8 @@
             <th>SKU</th>
             <th>Name</th>
             <th>Category</th>
-            <th>Quantity</th>
+            <th>Qty</th>
+            <th>Batches</th>
             <th>Selling Price</th>
             <th>Avg Cost</th>
             <th>Status</th>
@@ -90,8 +91,9 @@
                 }
               </td>
               <td>{{ product.totalQuantity }}</td>
-              <td>${{ product.sellingPrice }}</td>
-              <td>${{ product.averageCostPrice }}</td>
+              <td><span class="batch-count">{{ product.batchCount }}</span></td>
+              <td>${{ formatPrice(product.sellingPrice) }}</td>
+              <td>${{ formatPrice(product.averageCostPrice) }}</td>
               <td>
                 <span class="status {{ getStockStatus(product) }}">
                   {{ getStockLabel(product) }}
@@ -106,21 +108,12 @@
         </tbody>
       </table>
 
-      <!-- Pagination -->
       <div class="pagination">
-        <button
-          class="btn-page"
-          [disabled]="currentPage === 0"
-          (click)="currentPage = currentPage - 1; loadProducts()">
-          ← Prev
-        </button>
+        <button class="btn-page" [disabled]="currentPage === 0"
+          (click)="currentPage = currentPage - 1; loadProducts()">← Prev</button>
         <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-        <button
-          class="btn-page"
-          [disabled]="currentPage >= totalPages - 1"
-          (click)="currentPage = currentPage + 1; loadProducts()">
-          Next →
-        </button>
+        <button class="btn-page" [disabled]="currentPage >= totalPages - 1"
+          (click)="currentPage = currentPage + 1; loadProducts()">Next →</button>
       </div>
     </div>
 
@@ -129,29 +122,42 @@
       <div class="modal-overlay" (click)="closeAddModal()">
         <div class="modal" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>Add New Product</h3>
+            <h3>➕ New Product</h3>
             <button class="btn-close" (click)="closeAddModal()">✕</button>
           </div>
           <div class="modal-body">
-            <div class="form-group">
-              <label>Product Name *</label>
-              <input type="text" placeholder="e.g. iPhone 15" [(ngModel)]="newProduct.name" />
+            <div class="form-row">
+              <div class="form-group">
+                <label>Product Name *</label>
+                <input type="text" placeholder="e.g. iPhone 15" [(ngModel)]="newProduct.name" />
+              </div>
+              <div class="form-group">
+                <label>SKU *</label>
+                <input type="text" placeholder="e.g. APPLE-003" [(ngModel)]="newProduct.sku" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Selling Price *</label>
+                <input type="number" placeholder="e.g. 999.99" [(ngModel)]="newProduct.sellingPrice" />
+              </div>
+              <div class="form-group">
+                <label>Reorder Threshold</label>
+                <input type="number" placeholder="Default: 10" [(ngModel)]="newProduct.reorderThreshold" />
+              </div>
             </div>
             <div class="form-group">
-              <label>SKU *</label>
-              <input type="text" placeholder="e.g. APPLE-003" [(ngModel)]="newProduct.sku" />
-            </div>
-            <div class="form-group">
-              <label>Selling Price *</label>
-              <input type="number" placeholder="e.g. 999.99" [(ngModel)]="newProduct.sellingPrice" />
+              <label>Category</label>
+              <select [(ngModel)]="newProduct.categoryId">
+                <option [ngValue]="null">-- Select Category --</option>
+                @for (cat of categories; track cat.id) {
+                  <option [ngValue]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
             </div>
             <div class="form-group">
               <label>Description</label>
-              <input type="text" placeholder="Optional description" [(ngModel)]="newProduct.description" />
-            </div>
-            <div class="form-group">
-              <label>Reorder Threshold</label>
-              <input type="number" placeholder="Default: 10" [(ngModel)]="newProduct.reorderThreshold" />
+              <input type="text" placeholder="Optional" [(ngModel)]="newProduct.description" />
             </div>
           </div>
           <div class="modal-footer">
@@ -167,29 +173,42 @@
       <div class="modal-overlay" (click)="closeEditModal()">
         <div class="modal" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>Edit Product</h3>
+            <h3>✏️ Edit Product</h3>
             <button class="btn-close" (click)="closeEditModal()">✕</button>
           </div>
           <div class="modal-body">
-            <div class="form-group">
-              <label>Product Name *</label>
-              <input type="text" [(ngModel)]="editProduct.name" />
+            <div class="form-row">
+              <div class="form-group">
+                <label>Product Name *</label>
+                <input type="text" [(ngModel)]="editProduct.name" />
+              </div>
+              <div class="form-group">
+                <label>SKU *</label>
+                <input type="text" [(ngModel)]="editProduct.sku" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Selling Price *</label>
+                <input type="number" [(ngModel)]="editProduct.sellingPrice" />
+              </div>
+              <div class="form-group">
+                <label>Reorder Threshold</label>
+                <input type="number" [(ngModel)]="editProduct.reorderThreshold" />
+              </div>
             </div>
             <div class="form-group">
-              <label>SKU *</label>
-              <input type="text" [(ngModel)]="editProduct.sku" />
-            </div>
-            <div class="form-group">
-              <label>Selling Price *</label>
-              <input type="number" [(ngModel)]="editProduct.sellingPrice" />
+              <label>Category</label>
+              <select [(ngModel)]="editProduct.categoryId">
+                <option [ngValue]="null">-- Select Category --</option>
+                @for (cat of categories; track cat.id) {
+                  <option [ngValue]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
             </div>
             <div class="form-group">
               <label>Description</label>
               <input type="text" [(ngModel)]="editProduct.description" />
-            </div>
-            <div class="form-group">
-              <label>Reorder Threshold</label>
-              <input type="number" [(ngModel)]="editProduct.reorderThreshold" />
             </div>
           </div>
           <div class="modal-footer">
@@ -200,45 +219,112 @@
       </div>
     }
 
-    <!-- Import Excel Modal -->
+    <!-- Receive Stock Modal -->
+    @if (showBatchModal) {
+      <div class="modal-overlay" (click)="closeBatchModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>📦 Receive Stock</h3>
+            <button class="btn-close" (click)="closeBatchModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-hint">Find existing product by SKU or Name — or leave blank to auto-create.</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Product SKU</label>
+                <input type="text" placeholder="e.g. APPLE-001" [(ngModel)]="newBatch.productSku" />
+              </div>
+              <div class="form-group">
+                <label>Product Name</label>
+                <input type="text" placeholder="e.g. iPhone 15" [(ngModel)]="newBatch.productName" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Category *</label>
+                <input type="text" placeholder="e.g. Electronics" [(ngModel)]="newBatch.categoryName" />
+              </div>
+              <div class="form-group">
+                <label>Purchase Order ID</label>
+                <input type="text" placeholder="e.g. PO-2024-001" [(ngModel)]="newBatch.purchaseOrderId" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Quantity *</label>
+                <input type="number" placeholder="e.g. 100" [(ngModel)]="newBatch.quantity" />
+              </div>
+              <div class="form-group">
+                <label>Cost Price *</label>
+                <input type="number" placeholder="e.g. 750.00" [(ngModel)]="newBatch.costPrice" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Selling Price *</label>
+                <input type="number" placeholder="e.g. 999.99" [(ngModel)]="newBatch.sellingPrice" />
+              </div>
+              <div class="form-group">
+                <label>Expiry Date</label>
+                <input type="date" [(ngModel)]="newBatch.expiryDate" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Product Description</label>
+              <input type="text" placeholder="Optional" [(ngModel)]="newBatch.productDescription" />
+            </div>
+            <div class="form-group">
+              <label>Notes</label>
+              <input type="text" placeholder="Optional notes about this shipment" [(ngModel)]="newBatch.notes" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-cancel" (click)="closeBatchModal()">Cancel</button>
+            <button class="btn-save" (click)="receiveStock()">Receive Stock</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Import Modal -->
     @if (showImportModal) {
       <div class="modal-overlay" (click)="closeImportModal()">
         <div class="modal" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h3>📥 Import from Excel</h3>
+            <h3>{{ importType === 'excel' ? '📥 Import Excel' : '📄 Import CSV' }}</h3>
             <button class="btn-close" (click)="closeImportModal()">✕</button>
           </div>
           <div class="modal-body">
             <div class="import-info">
-              <p>Upload an <strong>.xlsx</strong> file with these columns:</p>
+              <p>Upload a <strong>{{ importType === 'excel' ? '.xlsx' : '.csv' }}</strong> file with these columns:</p>
               <ul>
                 <li>productName or sku</li>
                 <li>category</li>
                 <li>quantity</li>
                 <li>costPrice</li>
                 <li>sellingPrice</li>
+                <li>description (optional)</li>
+                <li>poNumber (optional)</li>
+                <li>expiryDate (optional, YYYY-MM-DD)</li>
+                <li>notes (optional)</li>
               </ul>
             </div>
             <div class="form-group">
-              <label>Select Excel File</label>
+              <label>Select File</label>
               <input
                 type="file"
-                accept=".xlsx"
+                [accept]="importType === 'excel' ? '.xlsx' : '.csv'"
                 class="file-input"
                 (change)="onFileSelected($event)"
               />
             </div>
             @if (importFile) {
-              <div class="file-selected">
-                ✅ {{ importFile.name }}
-              </div>
+              <div class="file-selected">✅ {{ importFile.name }}</div>
             }
           </div>
           <div class="modal-footer">
             <button class="btn-cancel" (click)="closeImportModal()">Cancel</button>
-            <button
-              class="btn-save"
-              (click)="importExcel()"
+            <button class="btn-save" (click)="importFile_()"
               [disabled]="importing || !importFile">
               {{ importing ? 'Importing...' : 'Import' }}
             </button>

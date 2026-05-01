@@ -64,12 +64,41 @@ export class ProductService {
   const headers = new HttpHeaders({
     'Authorization': `Bearer ${token}`
   });
+
+  
   
   const formData = new FormData();
   formData.append('file', file);
   
   return this.http.post(
     'http://localhost:8080/api/products/batches/import/excel',
+    formData,
+    { headers }
+  );
+}
+getCategoryList(): Observable<any> {
+  return this.http.get('http://localhost:8080/api/categories/list', {
+    headers: this.getHeaders()
+  });
+}
+
+receiveBatch(batch: any): Observable<any> {
+  return this.http.post(
+    'http://localhost:8080/api/products/batches',
+    batch,
+    { headers: this.getHeaders() }
+  );
+}
+
+importFromCSV(file: File): Observable<any> {
+  const token = this.authService.getToken();
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });
+  const formData = new FormData();
+  formData.append('file', file);
+  return this.http.post(
+    'http://localhost:8080/api/products/batches/import/csv',
     formData,
     { headers }
   );
